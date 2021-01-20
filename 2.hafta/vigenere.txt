@@ -1,0 +1,70 @@
+#include <stdio.h>
+#include <string.h>
+#include <cs50.h>
+int main(int argc, string argv[2])/*Argv terminale girilen argumanlari string turunde tutarken argc ise arguman sayisini integer turunde tutar.*/
+{  
+    if (argc != 2)/*argv[2] yazimiyla zaten arguman sayisini 2 ile sinirladim ama cs50 odev tanimi programin fazladan arguman girildiginde hata mesaji vermesini istediği için argc ile sayi kontrolu yapiyorum 2 den fazlaysa if dongusunun icindeki kodlar hata mesajini basip 1 degerini dondurerek hata oldugunu bildirecek ve program bitecek. */
+    {
+        printf("Usage: ./vigenere keyword\n");
+        return 1;
+    }
+    int anahtar_harf_sayisi = strlen(argv[1]);/*Anahtarin kac harfli oldugunu strlen ile aliyorum.argv[1] girilen anahtari tutuyor argv[0] ise programin çağrildiği konumu tutuyor ornegin linuxda bu './program adi' seklindedir.*/
+    int anahtar[anahtar_harf_sayisi];
+    for (int i = 0; i < anahtar_harf_sayisi; i++)/*Harf sayisinca for dongusunu icindeki kodlari calistirir.*/
+    {
+        if ((argv[1])[i]>='a' && (argv[1])[i]<='z')/*Anahtarin i. basamagi kucuk harf ise if in icindeki kodlari calistirir.*/
+        {
+            anahtar[i]= (int)(argv[1])[i] - 'a';
+        }
+        
+        else if ((argv[1])[i]>='A' && (argv[1])[i]<='Z')/*Anahtarin i. basamagi buyuk harf ise if in icindeki kodlari calistirir.*/
+        {
+            anahtar[i]= (int)(argv[1])[i] - 'A';
+        }
+        else /*Degilse hata mesajini basip 1 degerini dondurerek hata oldugunu programa bildirecek ve program bitecek. */
+        {
+            printf("Usage: ./vigenere keyword\n");
+            return 1;
+        }
+    }
+    string metin = get_string("plaintext:  ");/*Sifresiz metin string turunden alinir.*/
+    int harf_sayısı = strlen(metin);/*strlen ile metin uzunlugu alınıp harf_sayısına aktarılır.*/
+    printf("ciphertext: ");/*sifreli metin yazisini basa basar.*/
+    int noktalama=0;/*Kactane bosluk sembol noktalama yada rakam oldugunu tutar. */
+    for (int x = 0; x < harf_sayısı; x++)/*Metin nin harf sayisinca for dongusunun icindeki kodlari calistirir.*/
+    {
+        int asciihali = (int)metin[x];/*soldan x inci karakterin ascii degerini asciihali degisgenine aktarir.*/
+        if (asciihali<'A' || asciihali>'Z')/*Buyuk harf degilse*/
+        {  
+            if (asciihali<'a' || asciihali>'z')/*Kucuk harf degilse yani sembol bosluk ve numara karaktereri ise otelenmeden direkt bastirilir.*/
+            {
+                metin[x] = (char)asciihali;
+                noktalama ++;/*noktalama degisgeni bir attırılır*/
+
+            }
+            else/*Kucuk harf ise*/
+            {
+            asciihali += anahtar[(x-noktalama)%(anahtar_harf_sayisi)];/*noktalama sayısı x den cıkarılarak metin deki harf anahtardaki dogru harfe eslestirilir.Anahtarin harf sayisi ile modu alinarak metnin devamli sifrelenmesi saglanir.Anahtarin harf sayisi ile modun sıfır olmamasının nedeni x in calismaya 0 dan baslamasıdır.Ornegin abc anahtarı icin AAAA metni baslangıcta x=0 oldugu icin ABCA seklinde olur. */
+            if (asciihali> 'z')/*z den buyukse z ile olan ascii kodu farkını alır 
+            a dan baslayarak fark -1 kadar kaydırmaya devam eder.Farkdan 1 cikarmamizin nedeni a nın kendisininde kaydırmaya dahil olmasindan                    dolayi*/
+                {
+                    int fark = asciihali - 'z';
+                asciihali = 'a' + fark-1;
+                }
+            metin[x] = (char)asciihali;/*metin string(bitiminde \0 olan char array) olmasina ragmen metin[x] chardır.Kaydırılmıs ama integer turunde olan                 harfleri yeniden character olarak metin degisgenine yazıyoruz */
+            }
+        }
+        else/*Buyuk harf ise*/
+        {
+            asciihali += anahtar[(x-noktalama)%(anahtar_harf_sayisi)];/*47.satirdaki ile aynı kod.*/
+            if (asciihali> 'Z')/*kucukle ayni mantikta calisir sadece ascii deki buyuk harf aralıgıyla degistirlmistir*/
+                {
+                    int fark = asciihali - 'Z';
+                asciihali = 'A' + fark-1;
+                }
+            metin[x] = (char)asciihali;
+        }
+    }
+    
+    printf("%s\n", metin);/*Tum sifrelenmis metin bastirilir.*/
+}

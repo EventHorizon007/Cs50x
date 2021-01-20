@@ -1,0 +1,56 @@
+#include <stdio.h>
+#include <string.h>
+#include <cs50.h>
+#include <ctype.h>
+#include <stdlib.h>
+int main(int argc, string argv[2])/*Argv terminale girilen argumanlari string turunde tutarken argc ise arguman sayisini integer turunde tutar.*/
+{  
+    if (argc != 2)/*argv[2] yazimiyla zaten arguman sayisini 2 ile sinirlandi ama cs50 odev tanimi programin fazladan arguman girildiginde hata mesaji       vermesini istediği için argc ile sayi kontrolu yapilir.Arguman sayisi 2 den fazlaysa if dongusunun icindeki kodlar hata mesajini basip 1 degerini        dondurerek hata oldugunu programa bildirecek ve program bitecektir.*/
+    {
+        printf("Usage: ./caesar key\n");
+        return 1;
+    }
+    int basamak = strlen(argv[1]);/*Anahtarin kac basamakli oldugu strlen ile alinir.argv[1] girilen anahtari tutar argv[0] ise programin çağrildiği         konumu tutar.Ornegin linuxda bu './program adi' seklindedir.*/
+    for (int i = 0; i < basamak; i++)/*Basamak sayisinca for dongusunu icindeki kodlari calistirir.*/
+    {
+        if (!isdigit((argv[1])[i]))/*Anahtarin i. basamagi rakamsa değise if in icindeki kodlari calistirir.*/
+        {
+            printf("Usage: ./caesar key\n");
+            return 1;
+        }
+    }
+    int anahtar = atoi(argv[1]);/*Anahtar integer turunden bu degiskende tutulacak*/
+    anahtar %= 26;/*Ascii deki ingiliz alfabesinde 26 sayı oldugu icin 26 ile modunu alir.Girilen metinin harfleri z ye kadar kaydirildiktan sonra a dan     tekrar kaydirmaya baslayacagi icin anahtarin 26 ile modunu alinip kodun calisma suresi kisaltilmis olur.*/
+    string metin = get_string("plaintext:  ");/*Sifresiz metin string turunden alinir.*/
+    int harf_sayısı = strlen(metin);/*strlen ile metin uzunlugu alinip harf_sayısı degisgenine aktarilir.*/
+    printf("ciphertext: ");/*sifreli metin yazisini basa basar.*/
+    for (int x = 0; x < harf_sayısı; x++)/*harf sayisinca for dongusunun icindeki kodlar calistirilir.*/
+    {
+        int asciihali = (int)metin[x];/*soldan x inci karakterin ascii degeri asciihali degisgenine aktarilir.*/
+            if(islower(metin[x]))/*Kucuk harf ise else icindeki kodlar calistirilir.*/
+            {
+               asciihali += anahtar;/*asciihali otelenmesi istenen sayi kadar arttirilir.*/
+               if (asciihali> 'z')/*z den buyukse z ile olan ascii kodu farki alinir a dan baslayarak fark -1 kadar kaydirmaya devam edilir.Farkdan 1                   cikarilmasinin nedeni a nin kendisininde kaydirmaya dahil olmasindan dolayidir.*/
+               {
+                    int fark = asciihali - 'z';
+                    asciihali = 'a' + fark-1;
+               }
+               metin[x] = (char)asciihali;/*metin string(bitiminde \0 olan char array) olmasina ragmen metin[x] chardir.Kaydirilmis ama integer turunde olan             harfler yeniden character olarak metin degisgenine yazdirilir.*/
+            }
+        else if(isupper(metin[x]))/*Buyuk harf ise*/
+        {
+              asciihali += anahtar;
+              if (asciihali> 'Z')/*Kucukle ayni mantikta calisir sadece ascii deki buyuk harf araligiyla degistirilmistir*/
+              {
+                    int fark = asciihali - 'Z';
+                    asciihali = 'A' + fark-1;
+              }
+              metin[x] = (char)asciihali;
+        }
+        else /*Sembol,bosluk veya numara karaktereri ise otelenmeden direkt bastirilir.*/
+        {
+              metin[x] = (char)asciihali;
+        }
+    }
+    printf("%s\n", metin);
+}

@@ -1,0 +1,19 @@
+#define _XOPEN_SOURCE
+#include <unistd.h>
+#include <stdio.h>
+#include <string.h>
+#include <cs50.h>
+/*DES algoritmasina gore sifreleme programi.*/
+int main(int argc, string argv[])
+{
+    if (argc != 2)
+    {
+        printf("Usage: ./crack hash\n");
+        return 1;
+    } 
+    string metin = get_string("Sifrelenecek metni giriniz:");
+    string stuff;
+    stuff = crypt(metin,argv[1]);
+    printf("%s\n",stuff);
+    return 0;
+}

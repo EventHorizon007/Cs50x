@@ -1,0 +1,63 @@
+#define _XOPEN_SOURCE
+#include <unistd.h>
+#include <stdio.h>
+#include <string.h>
+#include <cs50.h>
+/*DES algoritmasina gore sifrelenmis sifreyi(hash) kırma(sifrenin sifrelenmemis halini bulma) programı.*/
+int main(int argc, string argv[])/*Arguman olarak hex kodu alinir.*/
+/*Bu kodu ben yazmadim.Sadece ufak degisiklikler yaptim.Orjinal kodun linki:https://github.com/mareksuscak/cs50/blob/master/pset2/crack/crack.c*/
+{
+    if (argc != 2)/*2 den farkli arguman varsa hata mesaji verir ve main 1 dondurerek kodu bitirir.*/
+    {
+        printf("Usage: crack <hash>\n");
+        return 1;
+    }
+    const int metin_sayaci = 53;/*26 küçük harf + 26 büyük harf + \ 0 1 karakter olarak sayılır = 53*/
+
+    string alfabe="\0abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    string hash = argv[1];
+    char salt[3];
+    salt[0]=hash[0];
+    salt[1]=hash[1];
+    salt[2] = '\0';
+    char anahtar_adayi[6]="\0\0\0\0\0\0";
+    /*İc ice dongulerle tum olası harf kombinasyonları denenir.*/
+    for (int besinci = 0; besinci < metin_sayaci; besinci++)
+    {
+        for (int dorduncu = 0; dorduncu < metin_sayaci; dorduncu++)
+        {
+            for (int ucuncu = 0; ucuncu < metin_sayaci; ucuncu++)
+            {
+                for (int ikinci = 0; ikinci < metin_sayaci; ikinci++)
+                {
+                    
+                    /* 0 olarak tanimlayabiliriz ama 0 bos stringtir.
+                    (yani sifre yok) buna izin verilmez (verilmemelidir!)*/
+                    for (int birinci = 1; birinci < metin_sayaci; birinci++)
+                    {
+                        anahtar_adayi[0] = alfabe[birinci];  // 1)
+                        anahtar_adayi[1] = alfabe[ikinci];   // 2)
+                        anahtar_adayi[2] = alfabe[ucuncu];   // 3)
+                        anahtar_adayi[3] = alfabe[dorduncu]; // 4)
+                        anahtar_adayi[4] = alfabe[besinci];  // 5)
+
+                        /* karakteler null dondurdugunde program calismayi durdurur.*/
+                        /*anahtar_adayi baslangicta sadece bos(\0) karakterlerden olusur.*/
+                        /*string in 5.satırına kadar bittikten sonra eger anahtar_adayi ile olusturulan hash bizim girdigimiz hash ile eslesiyorsa                               anahtar_adayi ni bastirarak sifreyi aciga cikarmis oluruz.main e 0 dondurerek program bitirilir.*/
+                        if (strcmp(crypt(anahtar_adayi, salt), hash) == 0)
+                        {
+                            printf("%s\n", anahtar_adayi);
+                            return 0;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    printf("Sifre kırılamadı!");
+
+    /*Sifre kırılamazsa mesajda yazdirilir main e 2 dondurerek bitirilir.Cunku ne bir hata nede basaridir.*/
+    /* 1 (yanlis arguman) yada 0 (basarili) coktan cikis statusu olarak ayrilmistir.*/
+    return 2;
+}

@@ -1,0 +1,83 @@
+#include <stdio.h>
+#include <string.h>
+#include <cs50.h>
+#include <ctype.h>
+int main(int argc, string argv[2])/*Argv terminale girilen argumanlari string turunde tutarken argc ise arguman sayisini integer turunde tutar.*/
+{  
+    if (argc != 2)/*argv[2] yazimiyla zaten arguman sayisini 2 ile sinirladim ama cs50 odev tanimi programin fazladan arguman girildiginde hata mesaji vermesini  istediği için argc ile sayi kontrolu yapiyorum 2 den fazlaysa if dongusunun  icindeki kodlar hata mesajini basip 1 degerini dondurerek hata oldugunu bildirecek ve program bitecek. */
+    {
+        printf("Usage: ./vigenere keyword\n");
+        return 1;
+    }
+    int anahtar_harf_sayisi = strlen(argv[1]);/*Anahtarin kac harfli oldugunu strlen ile aliyorum.argv[1] girilen anahtari tutuyor argv[0] ise programin çağrildiği konumu  tutuyor ornegin linuxda bu './program adi' seklindedir.*/
+    int anahtar[anahtar_harf_sayisi];
+    for (int i = 0; i < anahtar_harf_sayisi; i++)/*Harf sayisinca for dongusunu icindeki kodlari calistirir.*/
+    {
+        if (islower((argv[1])[i]))/*Anahtarin i. basamagi kucuk harf ise if in icindeki kodlari calistirir.*/
+        {
+            anahtar[i]= (int)(argv[1])[i] - 'a';
+        }
+        
+        else if (isupper((argv[1])[i]))/*Anahtarin i. basamagi buyuk harf ise if in icindeki kodlari calistirir.*/
+        {
+            anahtar[i]= (int)(argv[1])[i] - 'A';
+        }
+        else /*Degilse hata mesajini basip 1 degerini dondurerek hata oldugunu programa bildirecek ve program bitecek. */
+        {
+            printf("Usage: ./vigenere keyword\n");
+            return 1;
+        }
+    }
+    string metin = get_string("plaintext:  ");/*Sifresiz metin string turunden  alinir.*/
+    int harf_sayisi = strlen(metin);/*strlen ile metin uzunlugu alinip harf_sayisina  aktarilir.*/
+    printf("ciphertext: ");/*sifreli metin yazisini basa basar.*/
+    int noktalama=0;/*Kactane bosluk sembol noktalama yada rakam oldugunu tutar. */
+    for (int x = 0; x < harf_sayisi; x++)/*Metin nin harf sayisinca for dongusunun icindeki kodlari calistirir.*/
+    {
+        int asciihali = (int)metin[x];/*soldan x inci karakterin ascii degerini  asciihali degisgenine aktarir.*/
+        if (!isupper(metin[x]))/*Buyuk harf degilse*/
+        {  
+            if (!islower(metin[x]))/*Kucuk harf degilse yani sembol  bosluk ve numara karaktereri ise otelenmeden direkt bastirilir.*/
+            {
+                noktalama ++;/*noktalama degisgeni bir artirilir.*/
+            }
+            else/*Kucuk harf ise*/
+            {
+                if ((x+noktalama)<0)
+                {
+                    asciihali += anahtar[0];
+                }
+                else 
+                {
+                    asciihali += anahtar[(x-noktalama)%(anahtar_harf_sayisi)];
+                    /*noktalama sayisi x den cikarilarak metin deki harf anahtardaki dogru harfe eslestirilir.Anahtarin harf sayisi ile modu alinarak metnin devamli sifrelenmesi saglanir.Anahtarin harf sayisi ile modun sifir olmamasinin nedeni x in calismaya 0 dan baslamasidir.Ornegin abc anahtari icin AAAA metni baslangicta x=0 oldugu icin ABCA seklinde olur. */
+                }
+            if (asciihali> 'z')/*z den buyukse z ile olan ascii kodu farkini alir 
+            a dan baslayarak fark -1 kadar kaydirmaya devam eder.Farkdan 1 cikarmamizin nedeni a nin kendisininde kaydirmaya dahil olmasindan dolayi*/
+            {
+                int fark = asciihali - 'z';
+                asciihali = 'a' + fark-1;
+            }
+            metin[x] = (char)asciihali;/*metin string(bitiminde \0 olan char array)  olmasina ragmen metin[x] chardir.Kaydirilmis ama integer turunde olan harfleri yeniden character olarak metin degisgenine yaziyoruz */
+            }
+        }
+        else/*Buyuk harf ise*/
+        {
+            if ((x+noktalama)<0)/*Program hataya dusmesede eger baslangıcta bir noktalama girersek anahtar[-1] asciihali ile toplanıyordu ki oyle bir degisken yok.O yuzden bu if else argumanlarini ekledim.*/
+                {
+                    asciihali += anahtar[0];
+                }
+                else 
+                {
+                    asciihali += anahtar[(x-noktalama)%(anahtar_harf_sayisi)];
+                }
+                if (asciihali> 'Z')/*kucukle ayni mantikta calisir sadece ascii deki buyuk harf araliiiyla degistirlmistir*/
+                {
+                    int fark = asciihali - 'Z';
+                    asciihali = 'A' + fark-1;
+                }
+                metin[x] = (char)asciihali;
+        }
+    }
+    printf("%s\n", metin);/*Tum sifrelenmis metin bastirilir.*/
+}
